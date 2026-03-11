@@ -96,7 +96,7 @@ if isinstance(data.columns, pd.MultiIndex):
 # Handle empty data
 if data.empty:
     st.warning("No data returned for this stock. Try another time period.")
-
+    st.stop()
 # ---------------------------
 # Indicators
 # ---------------------------
@@ -465,4 +465,5 @@ if submit:
 
     col1.metric("Investment Value", f"₹{round(investment_value,2)}")
     col2.metric("Current Value", f"₹{round(current_value,2)}")
+
     col3.metric("Profit / Loss", f"₹{round(profit,2)}")
