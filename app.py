@@ -7,7 +7,12 @@ import plotly.express as px
 from models.model import predict_price
 @st.cache_data(ttl=600)
 def load_stock_data(symbol, period):
-    df = yf.download(symbol, period=period, progress=False)
+
+    ticker = yf.Ticker(symbol)
+    df = ticker.history(period=period)
+
+    if df.empty:
+        return df
 
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
@@ -467,3 +472,4 @@ if submit:
     col2.metric("Current Value", f"₹{round(current_value,2)}")
 
     col3.metric("Profit / Loss", f"₹{round(profit,2)}")
+
