@@ -1,6 +1,7 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 
@@ -93,6 +94,12 @@ compare_stocks = st.sidebar.multiselect(
 # ---------------------------
 
 data = load_stock_data(ticker, period)
+# ---------------------------
+# CLEAN DATA (FIX NaN ISSUE)
+# ---------------------------
+
+data.replace([np.inf, -np.inf], np.nan, inplace=True)
+data.dropna(inplace=True)
 
 # Fix MultiIndex columns from yfinance
 if isinstance(data.columns, pd.MultiIndex):
@@ -127,12 +134,24 @@ data["RSI"] = 100 - (100/(1+rs))
 
 usd_to_inr = 83
 
+# ---------------------------
+# SAFE METRICS CALCULATION
+# ---------------------------
+
+if len(data) < 2:
+    st.error("Not enough valid data to display metrics")
+    st.stop()
+
 latest_price = float(data["Close"].iloc[-1])
 prev_price = float(data["Close"].iloc[-2])
 volume = int(data["Volume"].iloc[-1])
 
 change = latest_price - prev_price
-percent_change = (change/prev_price)*100
+
+if prev_price != 0:
+    percent_change = (change / prev_price) * 100
+else:
+    percent_change = 0
 
 if currency == "USD":
     latest_price /= usd_to_inr
@@ -305,6 +324,16 @@ st.caption("Predictions are generated using a Random Forest machine learning mod
 try:
 
     predicted_price, df_model, forecast, r2, mae, rmse = predict_price(ticker)
+    if df_model is None or df_model.empty:
+      st.error("Model failed due to insufficient data")
+      st.stop()
+
+    df_model = df_model.dropna()
+
+    if len(df_model) == 0:
+
+        st.error("Prediction data invalid")
+        st.stop()
 
     current_price = float(df_model["Close"].iloc[-1])
 
@@ -472,4 +501,3 @@ if submit:
     col2.metric("Current Value", f"₹{round(current_value,2)}")
 
     col3.metric("Profit / Loss", f"₹{round(profit,2)}")
-
