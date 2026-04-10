@@ -1,3 +1,4 @@
+
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -352,11 +353,6 @@ try:
 
     col1.metric("Current Price", f"₹{round(current_price,2)}")
     col2.metric("Predicted Next Price", f"₹{round(predicted_price,2)}")
-
-    if predicted_price > current_price:
-        st.success("📈 BUY Signal")
-    else:
-        st.error("📉 SELL Signal")
 
     fig = go.Figure()
 
