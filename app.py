@@ -4,9 +4,10 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
-
+from streamlit_autorefresh import st_autorefresh
+import datetime
 from models.model import predict_price
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=5)
 def load_stock_data(symbol, period):
 
     ticker = yf.Ticker(symbol)
@@ -20,8 +21,15 @@ def load_stock_data(symbol, period):
 
     return df
 st.set_page_config(page_title="Financial Market Intelligence", layout="wide")
+# ---------------------------
+# AUTO REFRESH (LIVE MODE)
+# ---------------------------
+
+st_autorefresh(interval=10 * 1000, key="datarefresh")  
+# refresh every 10 seconds
 
 st.title("📊 Financial Market Intelligence Dashboard")
+st.markdown("🟢 **LIVE MODE ACTIVE** (Auto-refresh every 10s)")
 st.caption(
 "Interactive AI-powered dashboard for stock analysis, forecasting, and portfolio tracking."
 )
@@ -160,6 +168,9 @@ if currency == "USD":
 else:
     currency_symbol = "₹"
 st.subheader("📌 Market Snapshot")
+import datetime
+
+st.caption(f"Last Updated: {datetime.datetime.now().strftime('%H:%M:%S')}")
 st.caption("This section shows the latest market statistics for the selected stock.")
 col1,col2,col3,col4 = st.columns(4)
 
